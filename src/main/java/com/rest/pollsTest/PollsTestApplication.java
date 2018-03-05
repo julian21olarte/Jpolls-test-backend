@@ -20,6 +20,7 @@ public class PollsTestApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                     .allowedOrigins("http://localhost:4200")
+                    .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE")
                     .allowCredentials(true)
                     .maxAge(60 * 60 * 24);
             }

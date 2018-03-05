@@ -71,15 +71,37 @@ public class PollController {
     public String savePoll(@RequestBody Map<String, Object> request) {
         Poll newPoll;
         Gson gsonResponse = new Gson();
+        String response;
         try {
             newPoll = this.pollService.savePoll(request);
-            return gsonResponse.toJson(newPoll);
+            response = gsonResponse.toJson(newPoll);
         } catch (Exception ex) {
             Map<String, Object> exception = new HashMap<>();
             exception.put("status", 500);
             exception.put("message", "Poll could not be saved");
             exception.put("error", ex.toString());
-            return gsonResponse.toJson(exception);
+            response = gsonResponse.toJson(exception);
         }
+        return response;
+    }
+    
+    
+    @RequestMapping(value = "/poll/update/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String updatePoll(@RequestBody Map<String, Object> poll, @PathVariable("id") int id) {
+        Poll pollUpdated;
+        Gson gsonResponse = new Gson();
+        String response;
+        try {
+            pollUpdated = this.pollService.updatePoll(id, poll);
+            response = gsonResponse.toJson(pollUpdated);
+        } catch (Exception ex) {
+            Map<String, Object> exception = new HashMap<>();
+            exception.put("status", 500);
+            exception.put("message", "Poll could not be updated");
+            exception.put("error", ex.toString());
+            response = gsonResponse.toJson(exception);
+        }
+        return response;
     }
 }

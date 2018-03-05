@@ -74,7 +74,7 @@ public class PollService {
     }
     
     
-    public Poll savePoll(Map<String, Object> poll) throws Exception{
+    public Poll savePoll(Map<String, Object> poll) throws Exception {
         JdbcTemplate connection = this.JdbService.getConnection();
         //Get questions from current poll
         List<Map<String, Object>> questions = (List<Map<String, Object>>)(poll.get("questions"));
@@ -98,5 +98,32 @@ public class PollService {
         this.questionService.saveMany(questions);
         
         return this.getLastPoll();
+    }
+    
+    
+    public Poll updatePoll(Integer id, Map<String, Object> poll) throws Exception {
+        this.deletePollById(id);
+        JdbcTemplate connection = this.JdbService.getConnection();
+        List<Map<String, Object>> questions = (List<Map<String, Object>>)(poll.get("questions"));
+        
+        //Save current poll
+        String query = String.format("INSERT INTO polls(id, title, description, createdAt, updatedAt) "
+            + "VALUES(%s, '%s', '%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", id,
+            (String)(poll.get("title")),
+            (String)(poll.get("description")));
+        connection.update(query);        
+
+        questions.forEach((question) -> {
+            question.put("pollId", id);
+        });
+        this.questionService.saveMany(questions);
+        
+        return this.getLastPoll();
+    }
+
+    
+    private void deletePollById(Integer id) {
+        String query = String.format("DELETE FROM polls WHERE id = %s", id);
+        this.JdbService.getConnection().update(query);
     }
 }

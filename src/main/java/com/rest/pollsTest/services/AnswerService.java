@@ -44,7 +44,6 @@ public class AnswerService {
         );
     }
     
-    
     public void saveMany(List<Map<String, Object>> answers) throws Exception{
         JdbcTemplate connection = this.JdbService.getConnection();
         answers.forEach((answer) -> {
