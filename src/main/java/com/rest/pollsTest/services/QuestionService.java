@@ -9,6 +9,7 @@ import com.rest.pollsTest.models.Question;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
@@ -16,9 +17,11 @@ import java.util.Map;
  */
 public class QuestionService {
     private final JDBCService JdbService;
+    private final AnswerService answerService;
 
     public QuestionService() {
         this.JdbService = new JDBCService();
+        this.answerService = new AnswerService();
     }
     
     public List getQuestions() {
@@ -53,6 +56,27 @@ public class QuestionService {
             (String)(question.get("createdAt").toString()),
             (String)(question.get("updatedAt").toString())    
         );
+    }
+    
+    
+    public void saveMany(List<Map<String, Object>> questions) throws Exception{
+        JdbcTemplate connection = this.JdbService.getConnection();
+        for(Map<String, Object> question: questions) {
+            String query = String.format("INSERT INTO questions(description, pollId, createdAt, updatedAt) "
+                + "Values('%s', %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                (String)(question.get("description")),
+                (Integer)(question.get("pollId")));
+            connection.update(query);
+            
+            query = "SELECT id FROM questions ORDER BY id DESC LIMIT 1";
+            Map<String, Object> questionsInserted = connection.queryForMap(query);
+            Integer questionId = (Integer)(questionsInserted.get("id"));
+            List<Map<String, Object>> answers = (List<Map<String, Object>>)(question.get("answers"));
+            answers.forEach((answer) -> {
+                answer.put("questionId", questionId);
+            });
+            this.answerService.saveMany(answers);
+        }
     }
     
 }

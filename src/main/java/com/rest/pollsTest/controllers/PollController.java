@@ -9,9 +9,12 @@ import com.google.gson.Gson;
 import com.rest.pollsTest.models.Poll;
 import com.rest.pollsTest.models.QuestionAnswer;
 import com.rest.pollsTest.services.PollService;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -60,5 +63,23 @@ public class PollController {
     public String getResponses(@PathVariable("id") int id) {
         List<QuestionAnswer> responses = this.pollService.getResponsesById(id);
         return new Gson().toJson(responses);
+    }
+    
+    
+    @RequestMapping(value = "/poll/save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String savePoll(@RequestBody Map<String, Object> request) {
+        Poll newPoll;
+        Gson gsonResponse = new Gson();
+        try {
+            newPoll = this.pollService.savePoll(request);
+            return gsonResponse.toJson(newPoll);
+        } catch (Exception ex) {
+            Map<String, Object> exception = new HashMap<>();
+            exception.put("status", 500);
+            exception.put("message", "Poll could not be saved");
+            exception.put("error", ex.toString());
+            return gsonResponse.toJson(exception);
+        }
     }
 }

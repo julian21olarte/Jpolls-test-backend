@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,7 +38,7 @@ public class AuthController {
         if(((Boolean)responseUser.get("status"))) {
             return gsonResponse.toJson(responseUser.get("user"));
         }
-        responseUser.put("status", "401");
+        responseUser.put("status", 401);
         return gsonResponse.toJson(responseUser);
     }
     

@@ -10,6 +10,7 @@ import com.rest.pollsTest.models.QuestionAnswer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
@@ -18,10 +19,12 @@ import java.util.Map;
 public class PollService {
     private final JDBCService JdbService;
     private final QuestionAnswerService questionAnswerService;
+    private final QuestionService questionService;
 
     public PollService() {
         this.JdbService = new JDBCService();
         this.questionAnswerService = new QuestionAnswerService();
+        this.questionService = new QuestionService();
     }
     
     public List getPolls() {
@@ -68,5 +71,32 @@ public class PollService {
     
     public List<QuestionAnswer> getResponsesById(Integer id) {
         return this.questionAnswerService.getResponsesByPollId(id);
+    }
+    
+    
+    public Poll savePoll(Map<String, Object> poll) throws Exception{
+        JdbcTemplate connection = this.JdbService.getConnection();
+        //Get questions from current poll
+        List<Map<String, Object>> questions = (List<Map<String, Object>>)(poll.get("questions"));
+        
+        //Save current poll
+        String query = String.format(
+            "INSERT INTO polls(title, description, createdAt, updatedAt) "
+            + "VALUES('%s', '%s', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+            (String)(poll.get("title")),
+            (String)(poll.get("description")));
+        connection.update(query);
+        
+        query = "SELECT id FROM polls ORDER BY id DESC LIMIT 1";
+        Map<String, Object> pollInsertedId = connection.queryForMap(query);
+        Integer pollId = (Integer)(pollInsertedId.get("id"));
+        
+        //Insert new Poll id in all questions
+        questions.forEach((question) -> {
+            question.put("pollId", pollId);
+        });
+        this.questionService.saveMany(questions);
+        
+        return this.getLastPoll();
     }
 }
