@@ -126,4 +126,9 @@ public class PollService {
         String query = String.format("DELETE FROM polls WHERE id = %s", id);
         this.JdbService.getConnection().update(query);
     }
+    
+    public List<Map<String, Object>> replyLastPoll(Map<String, Object> lastPoll) throws Exception {
+        List<Map<String, Object>> questions = (List<Map<String, Object>>)(lastPoll.get("questions"));
+        return this.questionAnswerService.saveMany(questions);
+    }
 }

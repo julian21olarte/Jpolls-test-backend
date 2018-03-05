@@ -104,4 +104,23 @@ public class PollController {
         }
         return response;
     }
+    
+    @RequestMapping(value = "/poll/reply", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String replyPoll(@RequestBody Map<String, Object> poll) {
+        List<Map<String, Object>> responses;
+        Gson gsonResponse = new Gson();
+        String response;
+        try {
+            responses = this.pollService.replyLastPoll(poll);
+            response = gsonResponse.toJson(responses);
+        } catch (Exception ex) {
+            Map<String, Object> exception = new HashMap<>();
+            exception.put("status", 500);
+            exception.put("message", "Poll could not be updated");
+            exception.put("error", ex.toString());
+            response = gsonResponse.toJson(exception);
+        }
+        return response;
+    }
 }
